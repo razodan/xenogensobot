@@ -6,7 +6,7 @@ SERVER = "irc.twitch.tv"
 PORT = 6667
 
 #Your OAUTH Code Here https://twitchapps.com/tmi/
-PASS = "oauth:gajmx6oackfik1mcq5i645zuhxvk2j"
+PASS = "oauth:btemk0ax3x0q8frl80assxrq5xxe1e"
 
 #What you'd like to name your bot
 BOT = "GensoBot"
@@ -29,32 +29,79 @@ irc.send((	"PASS " + PASS + "\n" +
 
 def twitch():
 
-	fields = ['user', 'character', 'members', 'score', 'lives', 'bombs']
-	filename = "userData.csv"
-	rows = [ [] ]
-
-	with open(filename, 'w') as csvfile:
-		csvwriter = csv.writer(filename)
-		csvwriter.writerow(fields)
-		csvfile.close()
-
 	global user
 	global message
+
+	header = ['user', 'character', 'members', 'score', 'lives', 'bombs']
+	rows = []
+	filename = "userData.csv"
+
+	#make a list of Player objects. Access list. If Player object not in list, then initialize new Player object.
+	#else, update Player stuff after each command
+
+	with open(filename, 'w') as csvfile:
+		csvwriter = csv.writer(csvfile)
+		csvwriter.writerow(header)
 
 	def chatCommands(message):
 		if '!test' == message:
 			sendMessage(irc, 'True')
 			message = ""
 
-			#!fight
+		if '!battle' == message:
+			sendMessage(irc, 'fight command')
+			message = ""
+
+		if '!accept' == message:
+			sendMessage(irc, 'accept command')
+			message = ""
+
+		if '!shot' == message:
+			sendMessage(irc, 'player1 fires a shotType at player2!')
+			message = ""
+
+		if '!focus' == message:
+			sendMessage(irc, 'player1 fires a focusType at player2!')
+			message = ""
+
+		if '!bomb' == message:
+			sendMessage(irc, 'player1 unleashes a spell card at player2!') #then, activate the Character.printSign() function
+			message = ""
+
+		if '!dodge' == message:
+			sendMessage(irc, 'player1 attempts to dodge!') #then do some calculations. Three outcomes: dodge failed, dodge successful, or GRAZE
+			message = ""
+
+		if '!mystats' == message:
+			sendMessage(irc, 'stats') #display current character, score, lives, and bombs
+			message = ""
+
+		if '!party' == message:
+			#first, check for party number. 0 = Reimu & Marisa /// 1 = 0 + Youmu & Sakuya /// 2 = 1 + Reisen & Sanae /// 3 = 2 + Cirno & Aya /// 4 = 3 + Koishi & Hata no Kokoro
+			sendMessage(irc, 'available party members...') #display available party members
+			message = ""
+
+		if '!score' == message:
+			sendMessage(irc, 'display score -- ')
+			message = ""
+
+		if '!taunt' == message:
+			sendMessage(irc, 'randomly select a taunt from current Character object')
+			message = ""
+
+		if '!actions' == message:
+			sendMessage(irc, '!battle = initiate battle scene. || !accept = accept fight. || !shot = normal shot attack. || !focus = focus shot attack. || !bomb = spell card attack. || !dodge = attempt to dodge. || !taunt = taunt your enemy. || !mystats = check stats. || !party = check available Characters. || !score = check current score. || !actions = view this list.')
+
+			#!battle
 			#!accept
 				#!shot
 				#!focus
 				#!bomb
 				#!dodge
+				#!taunt
 			#!mystats
+			#!party
 			#!score
-			#!taunt
 			#!actions
 
 			#username, character, partymembers, lives, bombs, Stype, Ftype, Btype, score
@@ -72,7 +119,7 @@ def twitch():
 				
 				
 				#7: Cirno
-				#8: Aya Shameimaru
+				#8: Clownpiece
 
 			#DO HERE?#
 
@@ -88,7 +135,7 @@ def twitch():
 
 	def loadingComplete(line):
 		if("End of /NAMES list" in line):
-			print("TwitchBot has joined " + CHANNEL + "'s Channel!")
+			print("GensoBot has joined " + CHANNEL + "'s Channel!")
 			sendMessage(irc, "Successfully connected.")
 			return False
 		else:
@@ -99,9 +146,10 @@ def twitch():
 		irc.send((messageTemp + "\n").encode())
 
 	def newUser(name):
-		newline = [name, 'Reimu Hakurei', '0', '0', '3', '3']
+		newline = [name, 'Reimu Hakurei', '0', '0', '3', '1']
 		rows.append(newline)
-		csvwriter.writerow(newline)
+		print(rows)
+		#csvwriter.writerow(newline)
 
 	def getUser(line):
 		#global user
@@ -109,13 +157,6 @@ def twitch():
 		colonless = colons-1
 		separate = line.split(":", colons)
 		user = separate[colonless].split("!", 1)[0]
-
-		with open(filename, 'w') as csvfile:
-			csvfilewriter = csv.writer(csvfile)
-			if user not in rows:
-				newUser(user)
-			csvfile.close()
-
 		return user
 		#I need some file to store all the user info
 		#In this file, check if the user exists
@@ -158,15 +199,17 @@ def twitch():
 			else:
 				try:
 					user = getUser(line)
+					print(user)
+					# if user not in rows:
+					# 	try:
+					# 		newUser(user)
+					# 		print("newUser succeeded")
+					# 	except Exception:
+					# 		print("newUser failed")
+					# 		pass	
 					message = getMessage(line)
 					print(user + " : " + message)
-					print(message)
-
 					chatCommands(message)
-
-					#DO HERE?#
-
-
 				except Exception:
 					pass
 
