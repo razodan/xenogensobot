@@ -1,5 +1,5 @@
 # xenogensobot
-
+## Xenogensobot project has been put on indefinite hiatus.
 #############################
 ### What is XenoGensoBot? ###
 #############################
